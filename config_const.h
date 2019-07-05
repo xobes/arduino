@@ -7,3 +7,6 @@
 // timeout in seconds where open door will be automatically closed
 #define DOOR_TIMEOUT 60*60 // seconds
 #define DOOR_TIME_TO_CLOSE 30 // seconds
+
+#define GUI_CHECK_DOOR_MS 1000
+#define GUI_CHECK_DOOR_TIMER_MS 1000

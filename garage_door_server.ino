@@ -66,6 +66,7 @@ void check_door() {
   if(digitalRead(DOOR_SENSOR_PIN) == DOOR_CLOSED) {
     Serial.println("Door closed");
     door_state_1  = "closed";
+    door_timeout_1 = 0; // already closed, reset timer to 0
   }
   else {
     Serial.println("Door is open!");
@@ -221,12 +222,11 @@ void serve_loop() {
                 client.println("var timeoutID;");
                 client.println("function checkDoorLoop() {");
                 client.println("    $.get(\"/door/1/state\", {}, function(data, status) {");
-                client.println("        console.log(`${data} and status is ${status}`);");
                 client.println("        $(\"#door_state_1\").text(data)");
+                client.println("        timeoutID = window.setTimeout(checkDoorLoop, "+String(GUI_CHECK_DOOR_MS)+");");
                 client.println("    });");
-                client.println("    timeoutID = window.setTimeout(checkDoorLoop, 1000);");
                 client.println("}");
-                client.println("timeoutID = window.setTimeout(checkDoorLoop, 1000);");
+                client.println("timeoutID = window.setTimeout(checkDoorLoop, "+String(GUI_CHECK_DOOR_MS)+");");
                 client.println("</script>");
 
                 client.println("</td><td>");
@@ -248,10 +248,10 @@ void serve_loop() {
                 client.println("    $.get(\"/door/1/timeout\", {}, function(data, status) {");
                 client.println("        console.log(`${data} and status is ${status}`);");
                 client.println("        $(\"#door_timeout_1\").text(data)");
+                client.println("        timeoutID2 = window.setTimeout(checkDoorTimerLoop, "+String(GUI_CHECK_DOOR_TIMER_MS)+");");
                 client.println("    });");
-                client.println("    timeoutID2 = window.setTimeout(checkDoorTimerLoop, 1000);");
                 client.println("}");
-                client.println("timeoutID2 = window.setTimeout(checkDoorTimerLoop, 1000);");
+                client.println("timeoutID2 = window.setTimeout(checkDoorTimerLoop, "+String(GUI_CHECK_DOOR_TIMER_MS)+");");
                 client.println("</script>");
 
                 client.println("</td></tr></table></div>");
@@ -298,5 +298,5 @@ void loop() {
   logic_loop();
 
   Serial.println(".");
-  delay(500);
+  delay(100);
 }
