@@ -16,6 +16,7 @@
 
 // edit the config.h tab and enter your configuration needed for WiFi, cellular,
 // or ethernet clients.
+#include "config_const.h"
 #include "config_io.h"
 #include "config_wifi.h"
 
@@ -32,7 +33,9 @@ WiFiServer server(80);
 String header;
 
 // Auxiliary variables to store the current output state
+String last_door_state_1 = "unknown";
 String door_state_1 = "open";
+int door_timeout_1 = DOOR_TIMEOUT;
 
 void setup_server() {
   // Connect to Wi-Fi network with SSID and password
@@ -59,16 +62,6 @@ void setup_io() {
   digitalWrite(DOOR_CONTROL_PIN, LOW);
 }
 
-void setup() {
-
-  // start the serial connection
-  Serial.begin(115200);
-  while (!Serial);
-
-  setup_io();
-  setup_server();
-}
-
 void check_door() {
   if(digitalRead(DOOR_SENSOR_PIN) == DOOR_CLOSED) {
     Serial.println("Door closed");
@@ -78,7 +71,77 @@ void check_door() {
     Serial.println("Door is open!");
     door_state_1  = "open";
   }
+
+  // if the door_state has just now become open, last is not open,
+  // then initialize the timeout
+  if ((last_door_state_1 != "open") &&
+      (door_state_1 == "open")) {
+    door_timeout_1 = DOOR_TIMEOUT;
+  }
+  last_door_state_1 = door_state_1;
 }
+
+void logic_loop() {
+    if (door_state_1 == "open") {
+        if (door_timeout_1 == 0) {
+            // timeout fired and door is not closed
+            pulse_door_button();
+            door_timeout_1 = DOOR_TIME_TO_CLOSE; // delay for a bit before re-attempting to close the door
+        }
+    }
+}
+
+// will call this every second by ISR
+void update_timers(void *pArg) {
+  if (door_timeout_1 > 0) {
+    door_timeout_1 -= 1;
+  }
+}
+
+extern "C" {
+#include "user_interface.h"
+}
+
+os_timer_t myTimer;
+
+void setup_timers(void) {
+    /*
+    os_timer_setfn - Define a function to be called when the timer fires
+
+    void os_timer_setfn(
+          os_timer_t *pTimer,
+          os_timer_func_t *pFunction,
+          void *pArg)
+
+    Define the callback function that will be called when the timer reaches zero. The pTimer parameters is a pointer to the timer control structure.
+
+    The pFunction parameters is a pointer to the callback function.
+
+    The pArg parameter is a value that will be passed into the called back function. The callback function should have the signature:
+    void (*functionName)(void *pArg)
+
+    The pArg parameter is the value registered with the callback function.
+    */
+
+    os_timer_setfn(&myTimer, update_timers, NULL);
+
+    /*
+    os_timer_arm -  Enable a millisecond granularity timer.
+
+    void os_timer_arm(
+          os_timer_t *pTimer,
+          uint32_t milliseconds,
+          bool repeat)
+
+    Arm a timer such that is starts ticking and fires when the clock reaches zero.
+
+    The pTimer parameter is a pointed to a timer control structure.
+    The milliseconds parameter is the duration of the timer measured in milliseconds. The repeat parameter is whether or not the timer will restart once it has reached zero.
+
+    */
+
+    os_timer_arm(&myTimer, 1000, true);
+} // End of setup_timers
 
 void pulse_door_button() {
   digitalWrite(DOOR_CONTROL_PIN, HIGH);
@@ -115,6 +178,14 @@ void serve_loop() {
             } else if (header.indexOf("GET /door/1/state") >= 0) {
               check_door();
               client.println(door_state_1);
+
+            } else if (header.indexOf("GET /door/1/timeout") >= 0) {
+              client.println(String(door_timeout_1));
+            } else if (header.indexOf("PUT /door/1/timeout") >= 0) {
+              // TODO: implement PUT method, need to accept/coonvert args
+              Serial.println("PUT /door/1/timeout is not yet implemented...");
+              client.println("PUT /door/1/timeout is not yet implemented...");
+
             } else {
 
                 // ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,8 +211,11 @@ void serve_loop() {
 
                 check_door(); // i want fresh data...
 
-                client.println("<p>Door 1 is <span id=\"door_state_1\">"+door_state_1+"</span></p>");
+                client.println("<div><table width=\"100%\"><tr><td>");
+                client.println("<p>Door 1 is <span id=\"door_state_1\">"+door_state_1+"</span>; Timeout = <span id=\"door_timeout_1\">"+ door_timeout_1 +"</span></p>");
                 // i want to see the status live, set a timer to update this value over and over
+
+                client.println("</td><td>");
 
                 client.println("<script>");
                 client.println("var timeoutID;");
@@ -150,10 +224,12 @@ void serve_loop() {
                 client.println("        console.log(`${data} and status is ${status}`);");
                 client.println("        $(\"#door_state_1\").text(data)");
                 client.println("    });");
-                client.println("    timeoutID = window.setTimeout(checkDoorLoop, 2000);");
+                client.println("    timeoutID = window.setTimeout(checkDoorLoop, 1000);");
                 client.println("}");
-                client.println("timeoutID = window.setTimeout(checkDoorLoop, 2000);");
+                client.println("timeoutID = window.setTimeout(checkDoorLoop, 1000);");
                 client.println("</script>");
+
+                client.println("</td><td>");
 
                 client.println("<p><button id=\"door_1\" class=\"button\">DOOR 1</button></p>");
                 client.println("<script>");
@@ -163,6 +239,22 @@ void serve_loop() {
                 client.println("    });");
                 client.println("});");
                 client.println("</script>");
+
+                client.println("</td><td>");
+
+                client.println("<script>");
+                client.println("var timeoutID2;");
+                client.println("function checkDoorTimerLoop() {");
+                client.println("    $.get(\"/door/1/timeout\", {}, function(data, status) {");
+                client.println("        console.log(`${data} and status is ${status}`);");
+                client.println("        $(\"#door_timeout_1\").text(data)");
+                client.println("    });");
+                client.println("    timeoutID2 = window.setTimeout(checkDoorTimerLoop, 1000);");
+                client.println("}");
+                client.println("timeoutID2 = window.setTimeout(checkDoorTimerLoop, 1000);");
+                client.println("</script>");
+
+                client.println("</td></tr></table></div>");
 
                 // ///////////////////////////////////////////////////////////////////////////////////////////////////////
                 client.println("</body></html>");
@@ -189,8 +281,21 @@ void serve_loop() {
   }
 }
 
+void setup() {
+
+  // start the serial connection
+  Serial.begin(115200);
+  while (!Serial);
+
+  setup_io();
+  setup_timers();
+  setup_server();
+}
+
 void loop() {
   serve_loop();
+
+  logic_loop();
 
   Serial.println(".");
   delay(500);
