@@ -183,7 +183,7 @@ void serve_loop() {
             } else if (header.indexOf("GET /door/1/timeout") >= 0) {
               client.println(String(door_timeout_1));
             } else if (header.indexOf("PUT /door/1/timeout") >= 0) {
-              // TODO: implement PUT method, need to accept/coonvert args
+              // TODO: implement PUT method, need to accept/convert args
               Serial.println("PUT /door/1/timeout is not yet implemented...");
               client.println("PUT /door/1/timeout is not yet implemented...");
 
@@ -202,7 +202,8 @@ void serve_loop() {
                 client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
                 client.println(".button { background-color: #195B6A; border: none; color: white; padding: 16px 40px;");
                 client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-                client.println(".open {background-color: #77878A;}</style></head>");
+                client.println(".open {background-color: #e60c0c;}</style></head>");
+                // 0ce659 green   e60c0c red
 
                 // Web Page Heading
                 client.println("<body><h1>ESP8266 Web Server - Garage Door</h1>");
@@ -232,6 +233,8 @@ void serve_loop() {
                 client.println("</td><td>");
 
                 client.println("<p><button id=\"door_1\" class=\"button\">DOOR 1</button></p>");
+                // make the button require confirmation if the door is closed
+
                 client.println("<script>");
                 client.println("$('#door_1').click(function(){");
                 client.println("    $.post(\"/door/1/pulse\", {}, function(data, status) {");
@@ -239,8 +242,6 @@ void serve_loop() {
                 client.println("    });");
                 client.println("});");
                 client.println("</script>");
-
-                client.println("</td><td>");
 
                 client.println("<script>");
                 client.println("var timeoutID2;");
