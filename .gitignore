@@ -1,4 +1,5 @@
 config_wifi.h
+*.swp
 
 # Prerequisites
 *.d
