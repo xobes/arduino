@@ -1,0 +1,25 @@
+
+#include <ESP8266WiFi.h> // for String
+
+/******************************* TWILIO **************************************/
+#ifndef CONFIG_TWILIO_H
+#define CONFIG_TWILIO_H
+
+#define TWILIO_URI_CALL_FILTER "/twilio/call/filter"
+
+#define TWILIO_PH_NO "+19999999999"
+#define TWILIO_ACCOUNT_SID "XXXXXXXXXXXXX"
+
+#define ALLOWED_1 "+19999999999" /* 1 */
+#define ALLOWED_2 "+19999999999" /* 2 */
+#define ALLOWED_3 "+19999999999" /* 3 */
+
+#define TWILIO_FLOW_URL "https://webhooks.twilio.com/v1/Accounts/XXXXXXXXXXX/Flows/XXXXXXXXXXX"
+
+#define TWILIO_URI_DOOR_1 "/twilio/menu/door/1"
+#define TWILIO_URI_DOOR_2 "/twilio/menu/door/2"
+
+const String TWILIO_XML_REJECT           = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n     <Reject />\n</Response>";
+const String TWILIO_XML_REDIRECT_TO_FLOW = String("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response>\n     <Redirect method=\"POST\">") + TWILIO_FLOW_URL + "</Redirect>\n</Response>";
+
+#endif /* CONFIG_TWILIO_H */
