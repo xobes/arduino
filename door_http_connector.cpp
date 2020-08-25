@@ -7,11 +7,34 @@ String get_door_state(int which_door) {
     Serial.print("get_door_state(");
     Serial.print(which_door);
     Serial.print(")");
-    Serial.println();
+    Serial.print(" => ");
 
     DOOR* d = get_door(which_door);
     Serial.println (d->get_state());
     return (String)(d->get_state());
+}
+
+String get_door_master_state(int which_door) {
+    Serial.print("get_door_master_state(");
+    Serial.print(which_door);
+    Serial.print(")");
+    Serial.print(" => ");
+
+    DOOR* d = get_door(which_door);
+    Serial.println (d->get_master_state());
+    return (String)(d->get_master_state());
+}
+
+void set_door_master_state(int which_door, String master_state_string) {
+    Serial.print("set_door_master_state(");
+    Serial.print(which_door);
+    Serial.print(", ");
+    Serial.print(master_state_string);
+    Serial.print(")");
+    Serial.println();
+
+    DOOR* d = get_door(which_door);
+    d->set_master_state(master_state_string);
 }
 
 void pulse_door_relay(int which_door) {
@@ -30,7 +53,7 @@ int get_door_timeout(int which_door) {
     Serial.print("get_door_timeout(");
     Serial.print(which_door);
     Serial.print(")");
-    Serial.println();
+    Serial.print(" => ");
 
     DOOR* d = get_door(which_door);
     Serial.println (

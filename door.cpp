@@ -7,13 +7,7 @@ DOOR doors[MAX_DOORS];
 
 DOOR *get_door(int which_door) {
     int w = which_door - 1; // which_door is 1s based index
-    /*
-    for (int w; w<MAX_DOORS; w++) {
-        Serial.print(w);
-        Serial.print(": ");
-        Serial.println(doors[w].get_state()); // depends on later, hand-coded references to 1 and 2
-    }
-    */
+
     if (0 <= w < MAX_DOORS) {
         return &(doors[w]);
     }
@@ -38,5 +32,4 @@ void DOOR_loop() {
         doors[i].loop();
     }
 
-    // Serial.println("DOOR_loop()");
 }

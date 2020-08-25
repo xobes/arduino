@@ -1,4 +1,5 @@
 config_wifi.h
+config_twilio.h
 *.swp
 
 # Prerequisites

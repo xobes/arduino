@@ -38,14 +38,22 @@ https://app.diagrams.net/#G141r2ZxTGMS_f6xRk69w9_cTgzJ55bsQ0
     - tried to use a single timer for all the data...  problem is the esp8266 isn't quick and every now and then a client take a while to get data...
 so the timers bunch up and overlap eventually, bringing us to 100% load.
     - Need to either:
-        1) tally up the responses and wait until all of them come in to re-start the timer...
-        2) (better) have one timer that gets an aggregate of all state data (e.g. as a json object):
+obe?    1) tally up the responses and wait until all of them come in to re-start the timer...
+X       2) (better) have one timer that gets an aggregate of all state data (e.g. as a json object):
             data = { 1: {"state" : "blah", "timeout": 123456},
                      2: {"state" : "blah", "timeout": 123456} }
             This will reduce the http calls down by a factor of 4 and give us a fighting chance.
-        3) consider using ISR and long polling and a list of clients to support more than one client/response for the periodic data
+obe?    3) consider using ISR and long polling and a list of clients to support more than one client/response for the periodic data
             UDP would be great for spamming status info, so would MQTT, but I want it on a web page -- so TCP might be the only option...
             web sockets?
    
     
-
+master mode: normal/disabled/auto_shut
+X user-selectable master mode
+X user-selectable timeouts (-1 to disable timeout)
+password
+encryption (https?) (nginx, http forwarding from linux box?)
+hash urls/passwords
+mqtt
+incorporate twilio (sms on disabled by timeout; number verification; voice menu)
+debug hash: twilio test url redirect to custom url, serial print the hash, copy/paste :-) #define hash_url, compare to hash, done.
