@@ -7,7 +7,7 @@ String get_door_state(int which_door) {
     Serial.print("get_door_state(");
     Serial.print(which_door);
     Serial.print(")");
-    Serial.print(" => ");
+    Serial.println();
 
     DOOR* d = get_door(which_door);
     Serial.println (d->get_state());
@@ -18,7 +18,7 @@ String get_door_master_state(int which_door) {
     Serial.print("get_door_master_state(");
     Serial.print(which_door);
     Serial.print(")");
-    Serial.print(" => ");
+    Serial.println();
 
     DOOR* d = get_door(which_door);
     Serial.println (d->get_master_state());
@@ -53,7 +53,7 @@ int get_door_timeout(int which_door) {
     Serial.print("get_door_timeout(");
     Serial.print(which_door);
     Serial.print(")");
-    Serial.print(" => ");
+    Serial.println();
 
     DOOR* d = get_door(which_door);
     Serial.println (

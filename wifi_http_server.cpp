@@ -486,6 +486,7 @@ void handleTwilioDoor2() {
 
 void setup_server() {
     // Connect to Wi-Fi network with SSID and password
+    Serial.println("");
     Serial.print("Connecting to ");
     Serial.println(WIFI_SSID);
     WiFi.mode(WIFI_STA);
